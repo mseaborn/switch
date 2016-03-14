@@ -57,7 +57,7 @@ South,1,0,3
 """)
     write_input('loads', """\
 LOAD_ZONE,TIMEPOINT,lz_demand_mw
-South,1,8
+South,1,6.2
 South,2,0.5
 """)
 
@@ -113,7 +113,10 @@ S-Central_PV-1,2,0
 
     write_file(os.path.join(inputs_dir, 'modules'), 'project.no_commit\n')
 
-    switch_mod.solve.main(['-v'])
+    switch_mod.solve.main([])
+
+    # Check that we got some output.
+    assert os.path.exists(os.path.join('outputs', 'DispatchProj.tab'))
 
 
 main()
