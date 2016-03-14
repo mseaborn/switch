@@ -33,12 +33,11 @@ INVESTMENT_PERIOD,period_start,period_end
 """)
     write_input('timeseries', """\
 TIMESERIES,ts_period,ts_duration_of_tp,ts_num_tps,ts_scale_to_period
-2020_all,2020,12,2,3652.5
+2020_all,2020,24,1,3652.5
 """)
     write_input('timepoints', """\
 timepoint_id,timestamp,timeseries
 1,2025011512,2020_all
-2,2025011600,2020_all
 """)
 
     # Financial parameters
@@ -58,7 +57,6 @@ South,1,0,3
     write_input('loads', """\
 LOAD_ZONE,TIMEPOINT,lz_demand_mw
 South,1,6.2
-South,2,0.5
 """)
 
     # Possible generators
