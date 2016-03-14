@@ -7,6 +7,7 @@ set -eu
 export PYTHONPATH=$(cd .. && pwd)
 
 rm -rf inputs
+rm -rf outputs
 
 python convert_example.py
 echo done
