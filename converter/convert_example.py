@@ -1,9 +1,7 @@
 
 import os
 
-from pyomo.environ import *
-from switch_mod.utilities import define_AbstractModel
-import switch_mod.utilities
+import switch_mod.solve
 
 
 def write_file(filename, data):
@@ -111,18 +109,9 @@ S-Central_PV-1,1,0.61
 S-Central_PV-1,2,0
 """)
 
-    switch_model = define_AbstractModel(
-        'switch_mod', 'project.no_commit')#, 'fuel_cost')
-    switch_instance = switch_model.load_inputs(inputs_dir="inputs")
+    write_file(os.path.join(inputs_dir, 'modules'), 'project.no_commit\n')
 
-    opt = switch_mod.utilities.default_solver()
-
-    results = opt.solve(switch_instance, keepfiles=False, tee=False)
-    switch_instance.load(results)
-
-    results.write()
-    switch_instance.pprint()
-    #switch_model.save_results(results, switch_instance, "outputs")
+    switch_mod.solve.main(['-v'])
 
 
 main()
