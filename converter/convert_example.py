@@ -67,19 +67,16 @@ South,2,0.5
 generation_technology,g_max_age,g_min_build_capacity,g_scheduled_outage_rate,g_forced_outage_rate,g_is_resource_limited,g_is_variable,g_is_baseload,g_is_flexible_baseload,g_is_cogen,g_competes_for_space,g_variable_o_m,g_energy_source,g_full_load_heat_rate
 Geothermal,30,0,0.0075,0.0241,1,0,1,0,0,0,28.83,Geothermal,.
 NG_CC,20,0,0.04,0.06,0,0,0,0,0,0,3.4131,NaturalGas,6.705
-Central_PV,20,0,0,0.02,1,1,0,0,0,1,0,Solar,.
 """)
     write_input('project_info', """\
 PROJECT,proj_dbid,proj_gen_tech,proj_load_zone,proj_connect_cost_per_mw,proj_capacity_limit_mw,proj_variable_om
 S-Geothermal,33,Geothermal,South,134222,10,28.83
 S-NG_CC,34,NG_CC,South,57566.6,.,3.4131
-S-Central_PV-1,41,Central_PV,South,74881.9,2,.
 """)
     # Already-built projects.
     write_input('proj_existing_builds', """\
 PROJECT,build_year,proj_existing_cap
-S-NG_CC,2000,5
-S-Central_PV-1,2000,1
+S-NG_CC,2000,10
 S-Geothermal,1998,1
 """)
 
@@ -96,19 +93,15 @@ NaturalGas,0.05306,0
 
     write_input('non_fuel_energy_sources', """\
 energy_source
-Solar
 Geothermal
 """)
     write_input('proj_build_costs', """\
 PROJECT,build_year,proj_overnight_cost,proj_fixed_om
 S-NG_CC,2000,1143900,5868.3
-S-Central_PV-1,2000,2334300,41850
 S-Geothermal,1998,5524200,0
 """)
     write_input('variable_capacity_factors', """\
 PROJECT,timepoint,proj_max_capacity_factor
-S-Central_PV-1,1,0.61
-S-Central_PV-1,2,0
 """)
 
     write_file(os.path.join(inputs_dir, 'modules'), 'project.no_commit\n')
