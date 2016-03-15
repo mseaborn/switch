@@ -45,15 +45,17 @@ def main():
 # param discount_rate := .05;
 # """)
     write_file(os.path.join(inputs_dir, 'misc_params.dat'), """\
+param scenario_id := 1;
 param num_years_per_period := 10;
 param present_year := 2013;
+param enable_carbon_cap := 0;
 """)
 
     # Load (demand) and its organisation into zones
 
     write_input('load_area', keys=1, data="""\
 load_area,balancing_area,ccs_distance_km,present_day_existing_distribution_cost,present_day_max_coincident_demand_mwh_for_distribution,distribution_new_annual_payment_per_mw,existing_transmission_sunk_annual_payment,bio_gas_capacity_limit_mmbtu_per_hour,rps_compliance_entity
-S10,BalancingArea,0,0,0,0,0,0,0
+S10,SIN,0,0,0,0,0,0,0
 """)
 
     write_input('regional_grid_companies', keys=1, data="""\
@@ -101,7 +103,7 @@ S10,2016011600,4.604178233,4.105696313
 
     write_input('max_la_demand', keys=2, data="""\
 load_area,period,max_load_mw
-S10,2013,7.285715607
+S10,2014,7.285715607
 """)
 
     write_input('existing_plants', keys=3, data="""\
