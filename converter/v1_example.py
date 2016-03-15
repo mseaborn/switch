@@ -46,7 +46,7 @@ def main():
 # """)
     write_file(os.path.join(inputs_dir, 'misc_params.dat'), """\
 param scenario_id := 1;
-param num_years_per_period := 10;
+param num_years_per_period := 2;
 param present_year := 2013;
 param enable_carbon_cap := 0;
 """)
@@ -108,7 +108,7 @@ S10,2014,7.285715607
 
     write_input('existing_plants', keys=3, data="""\
 project_id,load_area,technology,plant_name,capacity_mw,heat_rate,cogen_thermal_demand_mmbtus_per_mwh,start_year,overnight_cost,connect_cost_per_mw,fixed_o_m,variable_o_m,ep_location_id
-#SIN_MonteRosa,S12,Bio_Solid_Steam_Turbine_EP,MonteRosa,54.5,9.035,0,1998,3536811.443,99048.565,100400.475,4.480182,0
+SIN_MonteRosa,S10,Gas_Combustion_Turbine,MonteRosa,54.5,9.035,0,1998,3536811.443,99048.565,100400.475,4.480182,0
 """)
 
     write_input('existing_plant_intermittent_capacity_factor', keys=4, data="""\
@@ -133,15 +133,17 @@ project_id,load_area,technology,hour,capacity_factor
 """)
     write_input('generator_info', keys=1, data="""\
 technology,technology_id,min_build_year,fuel,construction_time_years,year_1_cost_fraction,year_2_cost_fraction,year_3_cost_fraction,year_4_cost_fraction,year_5_cost_fraction,year_6_cost_fraction,max_age_years,forced_outage_rate,scheduled_outage_rate,can_build_new,ccs,intermittent,resource_limited,baseload,flexible_baseload,dispatchable,cogen,min_build_capacity,competes_for_space,storage,storage_efficiency,max_store_rate,max_spinning_reserve_fraction_of_capacity,heat_rate_penalty_spinning_reserve,minimum_loading,deep_cycling_penalty
+Gas_Combustion_Turbine,2,2030,Gas,2,0.25,0.75,0,0,0,0,20,0.0413,0.0318,0,0,0,0,0,0,1,0,0,0,0,0,0,0.3,0.087,0,0
 #Battery_Storage,33,2013,Storage,3,0.8,0.1,0.1,0,0,0,15,0.02,0.0055,1,0,0,0,0,0,0,0,0,0,1,0.767,1,0,0,0,0
 """)
     write_input('fuel_info', keys=1, data="""\
 fuel,rps_fuel_category,biofuel,carbon_content,carbon_sequestered
-Bio_Gas,renewable,1,0,0
+Gas,fossilish,0,0.05306,0
 """)
     write_input('fuel_prices', keys=3, data="""\
 load_area,fuel,year,fuel_price
-S10,Bio_Gas,2012,2.32675
+S10,Gas,2014,0.043478261
+S10,Gas,2015,0.043478261
 """)
 
 
