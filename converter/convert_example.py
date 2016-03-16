@@ -51,8 +51,8 @@ param discount_rate := .05;
     # Load (demand) and its organisation into zones
 
     write_input('load_zones', """\
-LOAD_ZONE,cost_multipliers,ccs_distance_km,dbid
-South,1,0,3
+LOAD_ZONE
+South
 """)
     write_input('loads', """\
 LOAD_ZONE,TIMEPOINT,lz_demand_mw
