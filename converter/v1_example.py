@@ -13,11 +13,7 @@ def write_file(filename, data):
         fh.close()
 
 
-def main():
-    inputs_dir = 'inputs'
-    if not os.path.exists(inputs_dir):
-        os.mkdir(inputs_dir)
-
+def write_example(inputs_dir):
     def write_input(name, keys, data):
         line1, _ = data.split('\n', 1)
         num_fields = len(line1.split(','))
@@ -192,10 +188,19 @@ S10,Gas,2015,0.043478261
 
 #     write_file(os.path.join(inputs_dir, 'modules'), 'project.no_commit\n')
 
+
+def main():
+    inputs_dir = 'inputs'
+    if not os.path.exists(inputs_dir):
+        os.mkdir(inputs_dir)
+
+    write_example(inputs_dir)
+
     subprocess.check_call(['./run_switch.sh'])
 
     # Check that we got some output.
     assert os.path.exists(os.path.join('outputs', 'DispatchProj.tab'))
 
 
-main()
+if __name__ == '__main__':
+    main()
