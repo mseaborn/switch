@@ -9,5 +9,5 @@ export PYTHONPATH=$(cd .. && pwd)
 rm -rf inputs
 rm -rf outputs
 
-python convert_example.py
+python v2_example.py
 echo done
