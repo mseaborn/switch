@@ -31,8 +31,8 @@ TIMESERIES,ts_period,ts_duration_of_tp,ts_num_tps,ts_scale_to_period
 2014_series,2014,24,1,1461.0
 """)
     write_input('timepoints', """\
-timepoint_id,timestamp,timeseries
-1,2025011512,2014_series
+timepoint_id,timeseries
+2016011600,2014_series
 """)
 
     # Financial parameters
@@ -51,7 +51,7 @@ S10
 """)
     write_input('loads', """\
 LOAD_ZONE,TIMEPOINT,lz_demand_mw
-S10,1,6.2
+S10,2016011600,6.2
 """)
 
     # Possible generators
