@@ -86,10 +86,11 @@ la_start,la_end,transmission_line_id,existing_transfer_capacity_mw,transmission_
 # 1,2025011512,2020_all
 # """)
 
-    # TODO: Fix hours_in_sample
+    # hours_in_sample = 24 hours/day * 365.25 days/year * 4
+    #   occurrences/investment period = 35064.0
     write_input('study_hours', keys=1, data="""\
 hour,period,date,hours_in_sample,month_of_year,hour_of_day
-2016011600,2014,20160116,240.0,1,0
+2016011600,2014,20160116,35064.0,1,0
 """)
 
     write_input('la_hourly_demand', keys=2, data="""\
