@@ -87,31 +87,38 @@ SIN_MonteRosa,S10,Gas_Combustion_Turbine,MonteRosa,54.5,9.035,0,1998,3536811.443
 project_id,load_area,technology,hour,capacity_factor
 SIN_ALBANISA,S26,Wind_EP,2016011600,0.798091
 """)
+
     write_input('hydro_monthly_limits_ep', keys=4, data="""\
 project_id,load_area,technology,date,average_output_mw
 SIN_HPA1,S16,Hydro_RoR_EP,20160116,0.0
 """)
+
     write_input('hydro_monthly_limits_new', keys=4, data="""\
 project_id,load_area,technology,date,average_output_cf
 16,S16,Hydro_RoR_RPS,20160116,0.371
 """)
+
     write_input('new_projects', keys=3, data="""\
 project_id,load_area,technology,location_id,ep_project_replacement_id,capacity_limit,capacity_limit_conversion,heat_rate,cogen_thermal_demand,connect_cost_per_mw,overnight_cost,fixed_o_m,variable_o_m,overnight_cost_change
 #1,S17,Central_PV,64,0,13,45,0,0,320960.6705,2067222.201,10621.2603,0,-0.036276106
 """)
+
     write_input('new_projects_intermittent_capacity_factor', keys=4, data="""\
 project_id,load_area,technology,hour,capacity_factor
 #1,S17,Central_PV,2016011600,0
 """)
+
     write_input('generator_info', keys=1, data="""\
 technology,technology_id,min_build_year,fuel,construction_time_years,year_1_cost_fraction,year_2_cost_fraction,year_3_cost_fraction,year_4_cost_fraction,year_5_cost_fraction,year_6_cost_fraction,max_age_years,forced_outage_rate,scheduled_outage_rate,can_build_new,ccs,intermittent,resource_limited,baseload,flexible_baseload,dispatchable,cogen,min_build_capacity,competes_for_space,storage,storage_efficiency,max_store_rate,max_spinning_reserve_fraction_of_capacity,heat_rate_penalty_spinning_reserve,minimum_loading,deep_cycling_penalty
 Gas_Combustion_Turbine,2,2030,Gas,2,0.25,0.75,0,0,0,0,20,0.0413,0.0318,0,0,0,0,0,0,1,0,0,0,0,0,0,0.3,0.087,0,0
 #Battery_Storage,33,2013,Storage,3,0.8,0.1,0.1,0,0,0,15,0.02,0.0055,1,0,0,0,0,0,0,0,0,0,1,0.767,1,0,0,0,0
 """)
+
     write_input('fuel_info', keys=1, data="""\
 fuel,rps_fuel_category,biofuel,carbon_content,carbon_sequestered
 Gas,fossilish,0,0.05306,0
 """)
+
     write_input('fuel_prices', keys=3, data="""\
 load_area,fuel,year,fuel_price
 S10,Gas,2014,0.043478261
