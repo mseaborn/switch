@@ -3,8 +3,6 @@
 
 import os
 
-import switch_mod.solve
-
 
 def write_file(filename, data):
     fh = open(filename, "w")
@@ -25,15 +23,16 @@ def write_example(inputs_dir):
 
     write_input('periods', """\
 INVESTMENT_PERIOD,period_start,period_end
-2020,2017,2026
+2014,2014,2017
 """)
+    # ts_scale_to_period = 365.25 * 4 = 1461.0 occurrences per invest period.
     write_input('timeseries', """\
 TIMESERIES,ts_period,ts_duration_of_tp,ts_num_tps,ts_scale_to_period
-2020_all,2020,24,1,3652.5
+2014_series,2014,24,1,1461.0
 """)
     write_input('timepoints', """\
 timepoint_id,timestamp,timeseries
-1,2025011512,2020_all
+1,2025011512,2014_series
 """)
 
     # Financial parameters
@@ -75,7 +74,7 @@ S-NG_CC,2000,10
     # intensity does not.
     write_input('fuel_cost', """\
 load_zone,fuel,period,fuel_cost
-South,NaturalGas,2020,4
+South,NaturalGas,2014_period,4
 """)
     write_input('fuels', """\
 fuel,co2_intensity,upstream_co2_intensity
@@ -103,6 +102,7 @@ def main():
 
     write_example(inputs_dir)
 
+    import switch_mod.solve
     switch_mod.solve.main([])
 
     # Check that we got some output.
