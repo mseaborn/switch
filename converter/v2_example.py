@@ -14,11 +14,7 @@ def write_file(filename, data):
         fh.close()
 
 
-def main():
-    inputs_dir = 'inputs'
-    if not os.path.exists(inputs_dir):
-        os.mkdir(inputs_dir)
-
+def write_example(inputs_dir):
     def write_input(name, data):
         write_file(os.path.join(inputs_dir, '%s.tab' % name),
                    data.replace(',', '\t'))
@@ -99,10 +95,19 @@ PROJECT,timepoint,proj_max_capacity_factor
 
     write_file(os.path.join(inputs_dir, 'modules'), 'project.no_commit\n')
 
+
+def main():
+    inputs_dir = 'inputs'
+    if not os.path.exists(inputs_dir):
+        os.mkdir(inputs_dir)
+
+    write_example(inputs_dir)
+
     switch_mod.solve.main([])
 
     # Check that we got some output.
     assert os.path.exists(os.path.join('outputs', 'DispatchProj.tab'))
 
 
-main()
+if __name__ == '__main__':
+    main()
