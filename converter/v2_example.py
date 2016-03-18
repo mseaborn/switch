@@ -47,11 +47,11 @@ param discount_rate := .05;
 
     write_input('load_zones', """\
 LOAD_ZONE
-South
+S10
 """)
     write_input('loads', """\
 LOAD_ZONE,TIMEPOINT,lz_demand_mw
-South,1,6.2
+S10,1,6.2
 """)
 
     # Possible generators
@@ -62,7 +62,7 @@ NG_CC,20,0,0.04,0.06,0,0,0,0,0,0,3.4131,NaturalGas,6.705
 """)
     write_input('project_info', """\
 PROJECT,proj_dbid,proj_gen_tech,proj_load_zone,proj_connect_cost_per_mw,proj_capacity_limit_mw,proj_variable_om
-S-NG_CC,34,NG_CC,South,57566.6,.,3.4131
+S-NG_CC,34,NG_CC,S10,57566.6,.,3.4131
 """)
     # Already-built projects.
     write_input('proj_existing_builds', """\
@@ -74,7 +74,7 @@ S-NG_CC,2000,10
     # intensity does not.
     write_input('fuel_cost', """\
 load_zone,fuel,period,fuel_cost
-South,NaturalGas,2014_period,4
+S10,NaturalGas,2014_period,4
 """)
     write_input('fuels', """\
 fuel,co2_intensity,upstream_co2_intensity
