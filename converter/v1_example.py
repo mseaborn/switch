@@ -121,8 +121,10 @@ Gas,fossilish,0,0.05306,0
 
     write_input('fuel_prices', keys=3, data="""\
 load_area,fuel,year,fuel_price
-S10,Gas,2014,0.043478261
-S10,Gas,2015,0.043478261
+S10,Gas,2014,0.04
+S10,Gas,2015,0.05
+S10,Gas,2016,0.06
+S10,Gas,2017,0.07
 """)
 
 
