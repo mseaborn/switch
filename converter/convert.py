@@ -85,6 +85,21 @@ def main():
           'timeseries': row['date']}
          for row in study_hours))
 
+    misc_params = open(os.path.join(v1_inputs, 'misc_params.dat'), 'r').read()
+    # TODO: Parse this from the file
+    num_years_per_period = 4
+    assert 'num_years_per_period := %d;' % num_years_per_period in misc_params
+    periods = list(sorted(set(int(row['period']) for row in study_hours)))
+    for i in xrange(len(periods) - 1):
+        assert periods[i + 1] == periods[i] + num_years_per_period
+    write_v2_table(
+        'periods',
+        ['INVESTMENT_PERIOD', 'period_start', 'period_end'],
+        ({'INVESTMENT_PERIOD': year,
+          'period_start': year,
+          'period_end': year + num_years_per_period - 1}
+         for year in periods))
+
     def map_table(out_name, in_name, fields):
         def convert(row):
             return dict((a, row[b]) for a, b in fields)

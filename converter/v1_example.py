@@ -26,7 +26,7 @@ def write_example(inputs_dir):
 
     write_file(os.path.join(inputs_dir, 'misc_params.dat'), """\
 param scenario_id := 1;
-param num_years_per_period := 2;
+param num_years_per_period := 4;
 param present_year := 2013;
 param enable_carbon_cap := 0;
 """)
