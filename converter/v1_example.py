@@ -110,21 +110,21 @@ project_id,load_area,technology,hour,capacity_factor
 
     write_input('generator_info', keys=1, data="""\
 technology,technology_id,min_build_year,fuel,construction_time_years,year_1_cost_fraction,year_2_cost_fraction,year_3_cost_fraction,year_4_cost_fraction,year_5_cost_fraction,year_6_cost_fraction,max_age_years,forced_outage_rate,scheduled_outage_rate,can_build_new,ccs,intermittent,resource_limited,baseload,flexible_baseload,dispatchable,cogen,min_build_capacity,competes_for_space,storage,storage_efficiency,max_store_rate,max_spinning_reserve_fraction_of_capacity,heat_rate_penalty_spinning_reserve,minimum_loading,deep_cycling_penalty
-Gas_Combustion_Turbine,2,2030,Gas,2,0.25,0.75,0,0,0,0,20,0.0413,0.0318,0,0,0,0,0,0,1,0,0,0,0,0,0,0.3,0.087,0,0
+Gas_Combustion_Turbine,2,2030,NaturalGas,2,0.25,0.75,0,0,0,0,20,0.0413,0.0318,0,0,0,0,0,0,1,0,0,0,0,0,0,0.3,0.087,0,0
 #Battery_Storage,33,2013,Storage,3,0.8,0.1,0.1,0,0,0,15,0.02,0.0055,1,0,0,0,0,0,0,0,0,0,1,0.767,1,0,0,0,0
 """)
 
     write_input('fuel_info', keys=1, data="""\
 fuel,rps_fuel_category,biofuel,carbon_content,carbon_sequestered
-Gas,fossilish,0,0.05306,0
+NaturalGas,fossilish,0,0.05306,0
 """)
 
     write_input('fuel_prices', keys=3, data="""\
 load_area,fuel,year,fuel_price
-S10,Gas,2014,0.04
-S10,Gas,2015,0.05
-S10,Gas,2016,0.06
-S10,Gas,2017,0.07
+S10,NaturalGas,2014,0.04
+S10,NaturalGas,2015,0.05
+S10,NaturalGas,2016,0.06
+S10,NaturalGas,2017,0.07
 """)
 
 

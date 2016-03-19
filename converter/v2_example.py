@@ -74,7 +74,7 @@ S-NG_CC,2000,10
     # intensity does not.
     write_input('fuel_cost', """\
 load_zone,fuel,period,fuel_cost
-S10,NaturalGas,2014_period,4
+S10,NaturalGas,2014,4
 """)
     write_input('fuels', """\
 fuel,co2_intensity,upstream_co2_intensity
@@ -92,7 +92,10 @@ S-NG_CC,2000,1143900,5868.3
 PROJECT,timepoint,proj_max_capacity_factor
 """)
 
-    write_file(os.path.join(inputs_dir, 'modules'), 'project.no_commit\n')
+    write_file(os.path.join(inputs_dir, 'modules'), """\
+project.no_commit
+fuel_cost
+""")
 
 
 def main():
