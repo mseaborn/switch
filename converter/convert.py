@@ -31,7 +31,10 @@ def main():
 
         return list(csv.DictReader(fh, delimiter='\t'))
 
+    files_left_to_convert = set(os.listdir(v2_inputs))
+
     def write_v2_table(name, fields, rows):
+        files_left_to_convert.remove('%s.tab' % name)
         filename = os.path.join(v2_inputs, '%s.tab' % name)
         fh = open(filename, 'w')
 
@@ -82,9 +85,31 @@ def main():
           'timeseries': row['date']}
          for row in study_hours))
 
+    load_areas = read_v1_table('load_area')
+    write_v2_table(
+        'load_zones',
+        ['LOAD_ZONE'],
+        ({'LOAD_ZONE': row['load_area']} for row in load_areas))
+
+    demand = read_v1_table('la_hourly_demand')
+    write_v2_table(
+        'loads',
+        ['LOAD_ZONE', 'TIMEPOINT', 'lz_demand_mw'],
+        ({'LOAD_ZONE': row['load_area'],
+          'TIMEPOINT': row['hour'],
+          'lz_demand_mw': row['load_mw']}
+         for row in demand))
+
+    for name in sorted(files_left_to_convert):
+        print 'remaining:', name
+
+    v2_outputs = os.path.join('tmp', 'v2_outputs')
     import switch_mod.solve
     switch_mod.solve.main(['--inputs=%s' % v2_inputs,
-                           '--outputs=%s' % os.path.join('tmp', 'v2_outputs')])
+                           '--outputs=%s' % v2_outputs])
+
+    # Check that we got some output.
+    assert os.path.exists(os.path.join(v2_outputs, 'DispatchProj.tab'))
 
 
 if __name__ == '__main__':
