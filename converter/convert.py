@@ -85,20 +85,21 @@ def main():
           'timeseries': row['date']}
          for row in study_hours))
 
-    load_areas = read_v1_table('load_area')
-    write_v2_table(
-        'load_zones',
-        ['LOAD_ZONE'],
-        ({'LOAD_ZONE': row['load_area']} for row in load_areas))
+    def map_table(out_name, in_name, fields):
+        def convert(row):
+            return dict((a, row[b]) for a, b in fields)
+        write_v2_table(
+            out_name,
+            [a for a, b in fields],
+            (convert(row) for row in read_v1_table(in_name)))
 
-    demand = read_v1_table('la_hourly_demand')
-    write_v2_table(
-        'loads',
-        ['LOAD_ZONE', 'TIMEPOINT', 'lz_demand_mw'],
-        ({'LOAD_ZONE': row['load_area'],
-          'TIMEPOINT': row['hour'],
-          'lz_demand_mw': row['load_mw']}
-         for row in demand))
+    map_table('load_zones', 'load_area',
+              [('LOAD_ZONE', 'load_area')])
+
+    map_table('loads', 'la_hourly_demand',
+              [('LOAD_ZONE', 'load_area'),
+               ('TIMEPOINT', 'hour'),
+               ('lz_demand_mw', 'load_mw')])
 
     for name in sorted(files_left_to_convert):
         print 'remaining:', name
