@@ -9,6 +9,13 @@ import v1_example
 import v2_example
 
 
+def group_by(rows, key):
+    d = {}
+    for row in rows:
+        d.setdefault(key(row), []).append(row)
+    return sorted(d.iteritems())
+
+
 def main():
     if os.path.exists('tmp'):
         shutil.rmtree('tmp')
@@ -115,6 +122,38 @@ def main():
               [('LOAD_ZONE', 'load_area'),
                ('TIMEPOINT', 'hour'),
                ('lz_demand_mw', 'load_mw')])
+
+    # Generate some mappings that help when averaging over years
+    # within a period.
+    year_to_period = {}
+    period_to_years = {}
+    for start_year in periods:
+        years = range(start_year, start_year + num_years_per_period)
+        period_to_years[start_year] = years
+        for year in years:
+            year_to_period[year] = start_year
+
+    # Calculate fuel costs per investment period.  In v1, the costs
+    # are specified per year, though this finer granularity is never
+    # used.  We calculate average costs across the years within each
+    # investment period, just as Switch v1 does.
+    groups = group_by(read_v1_table('fuel_prices'),
+                      lambda row: (row['load_area'],
+                                   row['fuel'],
+                                   year_to_period[int(row['year'])]))
+    for (load_area, fuel, period), rows in groups:
+        years = [int(row['year']) for row in rows]
+        assert years == period_to_years[period], \
+            (years, period_to_years[period])
+    write_v2_table(
+        'fuel_cost',
+        ['load_zone', 'fuel', 'period', 'fuel_cost'],
+        ({'load_zone': load_area,
+          'fuel': fuel,
+          'period': period,
+          'fuel_cost': sum(float(row['fuel_price'])
+                           for row in rows) / len(rows)}
+         for (load_area, fuel, period), rows in groups))
 
     for name in sorted(files_left_to_convert):
         print 'remaining:', name
