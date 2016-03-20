@@ -108,8 +108,15 @@ def main():
          for year in periods))
 
     def map_table(out_name, in_name, fields):
+        def map_field(row, f):
+            if isinstance(f, str):
+                return row[f]
+            else:
+                return f(row)
+
         def convert(row):
-            return dict((a, row[b]) for a, b in fields)
+            return dict((a, map_field(row, b)) for a, b in fields)
+
         write_v2_table(
             out_name,
             [a for a, b in fields],
@@ -122,6 +129,21 @@ def main():
               [('LOAD_ZONE', 'load_area'),
                ('TIMEPOINT', 'hour'),
                ('lz_demand_mw', 'load_mw')])
+
+    map_table('generator_info', 'generator_info',
+              [('generation_technology', 'technology'),
+               ('g_max_age', 'max_age_years'),
+               ('g_is_variable', 'intermittent'),
+               ('g_is_baseload', 'baseload'),
+               ('g_is_flexible_baseload', 'flexible_baseload'),
+               ('g_is_cogen', 'cogen'),
+               # Dummy value: should be overridden at project level.
+               ('g_variable_o_m', lambda row: 9999),
+               ('g_energy_source', 'fuel'),
+               # Dummy value: should be overridden at project level.
+               ('g_full_load_heat_rate', lambda row: 9999),
+               ('g_forced_outage_rate', 'forced_outage_rate'),
+               ])
 
     # Generate some mappings that help when averaging over years
     # within a period.

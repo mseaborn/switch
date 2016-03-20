@@ -58,11 +58,11 @@ S10,2016011600,6.2
 
     write_input('generator_info', """\
 generation_technology,g_max_age,g_min_build_capacity,g_scheduled_outage_rate,g_forced_outage_rate,g_is_resource_limited,g_is_variable,g_is_baseload,g_is_flexible_baseload,g_is_cogen,g_competes_for_space,g_variable_o_m,g_energy_source,g_full_load_heat_rate
-NG_CC,20,0,0.04,0.06,0,0,0,0,0,0,3.4131,NaturalGas,6.705
+NaturalGas-CombinedCycle,20,0,0.04,0.06,0,0,0,0,0,0,3.4131,NaturalGas,6.705
 """)
     write_input('project_info', """\
 PROJECT,proj_dbid,proj_gen_tech,proj_load_zone,proj_connect_cost_per_mw,proj_capacity_limit_mw,proj_variable_om
-S-NG_CC,34,NG_CC,S10,57566.6,.,3.4131
+S-NG_CC,34,NaturalGas-CombinedCycle,S10,57566.6,.,3.4131
 """)
     # Already-built projects.
     write_input('proj_existing_builds', """\
