@@ -62,12 +62,12 @@ NaturalGas-CombinedCycle,20,0,0.04,0.06,0,0,0,0,0,0,3.4131,NaturalGas,6.705
 """)
     write_input('project_info', """\
 PROJECT,proj_dbid,proj_gen_tech,proj_load_zone,proj_connect_cost_per_mw,proj_capacity_limit_mw,proj_variable_om
-S-NG_CC,34,NaturalGas-CombinedCycle,S10,57566.6,.,3.4131
+SIN_MonteRosa,34,NaturalGas-CombinedCycle,S10,57566.6,.,3.4131
 """)
     # Already-built projects.
     write_input('proj_existing_builds', """\
 PROJECT,build_year,proj_existing_cap
-S-NG_CC,2000,10
+SIN_MonteRosa,2000,10
 """)
 
     # Fuel cost and CO2 intensity.  Cost can vary by load zone; CO2
@@ -86,7 +86,7 @@ energy_source
 """)
     write_input('proj_build_costs', """\
 PROJECT,build_year,proj_overnight_cost,proj_fixed_om
-S-NG_CC,2000,1143900,5868.3
+SIN_MonteRosa,2000,1143900,5868.3
 """)
     write_input('variable_capacity_factors', """\
 PROJECT,timepoint,proj_max_capacity_factor

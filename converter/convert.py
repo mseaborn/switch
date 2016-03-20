@@ -142,6 +142,12 @@ def main():
                ('g_forced_outage_rate', 'forced_outage_rate'),
                ])
 
+    map_table('project_info', 'existing_plants',
+              [('PROJECT', 'project_id'),
+               ('proj_gen_tech', 'technology'),
+               ('proj_load_zone', 'load_area'),
+               ('proj_connect_cost_per_mw', 'connect_cost_per_mw')])
+
     map_table('fuels', 'fuel_info',
               [('fuel', 'fuel'),
                ('co2_intensity', 'carbon_content')])
