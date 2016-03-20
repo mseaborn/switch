@@ -148,6 +148,11 @@ def main():
                ('proj_load_zone', 'load_area'),
                ('proj_connect_cost_per_mw', 'connect_cost_per_mw')])
 
+    map_table('proj_existing_builds', 'existing_plants',
+              [('PROJECT', 'project_id'),
+               ('build_year', 'start_year'),
+               ('proj_existing_cap', 'capacity_mw')])
+
     map_table('fuels', 'fuel_info',
               [('fuel', 'fuel'),
                ('co2_intensity', 'carbon_content')])
