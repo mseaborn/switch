@@ -57,10 +57,7 @@ def main():
 
     study_hours = read_v1_table('study_hours')
     print study_hours
-    by_series = {}
-    for row in study_hours:
-        key = (row['period'], row['date'])
-        by_series.setdefault(key, []).append(row)
+    by_series = group_by(study_hours, lambda row: (row['period'], row['date']))
     # Example: Nicaragua v1 model has median & peak time series for
     # each month, so 2*12 = 24 per year.  It has 12 time points per
     # time series.
@@ -84,7 +81,7 @@ def main():
           'ts_num_tps': len(rows),
           'ts_scale_to_period':
               sum(float(row['hours_in_sample']) for row in rows) / 24.0}
-         for (period, series), rows in sorted(by_series.iteritems())))
+         for (period, series), rows in sorted(by_series)))
     write_v2_table(
         'timepoints',
         ['timepoint_id', 'timeseries'],
