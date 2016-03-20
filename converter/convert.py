@@ -153,6 +153,12 @@ def main():
                ('build_year', 'start_year'),
                ('proj_existing_cap', 'capacity_mw')])
 
+    map_table('proj_build_costs', 'existing_plants',
+              [('PROJECT', 'project_id'),
+               ('build_year', 'start_year'),
+               ('proj_overnight_cost', 'overnight_cost'),
+               ('proj_fixed_om', 'fixed_o_m')])
+
     map_table('fuels', 'fuel_info',
               [('fuel', 'fuel'),
                ('co2_intensity', 'carbon_content')])
