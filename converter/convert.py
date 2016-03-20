@@ -145,6 +145,10 @@ def main():
                ('g_forced_outage_rate', 'forced_outage_rate'),
                ])
 
+    map_table('fuels', 'fuel_info',
+              [('fuel', 'fuel'),
+               ('co2_intensity', 'carbon_content')])
+
     # Generate some mappings that help when averaging over years
     # within a period.
     year_to_period = {}
