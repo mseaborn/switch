@@ -16,6 +16,11 @@ def group_by(rows, key):
     return sorted(d.iteritems())
 
 
+def assert_eq(x, y):
+    if x != y:
+        raise AssertionError('%r != %r' % (x, y))
+
+
 def main():
     if os.path.exists('tmp'):
         shutil.rmtree('tmp')
@@ -205,6 +210,18 @@ def main():
 
     # Check that we got some output.
     assert os.path.exists(os.path.join(v2_outputs, 'DispatchProj.tab'))
+
+    v1_dispatch = list(csv.DictReader(
+        open(os.path.join('v1_outputs/generator_and_storage_dispatch_0.txt')),
+        delimiter='\t'))
+    assert_eq(len(v1_dispatch), 1)
+    assert_eq(v1_dispatch[0]['power'], '5.06')
+
+    v2_dispatch = list(csv.DictReader(
+        open(os.path.join(v2_outputs, 'DispatchProj.tab')),
+        delimiter='\t'))
+    assert_eq(len(v2_dispatch), 1)
+    assert_eq('%.4f' % float(v2_dispatch[0]['DispatchProj']), '4.6042')
 
 
 if __name__ == '__main__':
