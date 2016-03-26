@@ -9,6 +9,14 @@ import v1_example
 import v2_example
 
 
+def write_file(filename, data):
+    fh = open(filename, "w")
+    try:
+        fh.write(data)
+    finally:
+        fh.close()
+
+
 def group_by(rows, key):
     d = {}
     for row in rows:
@@ -125,7 +133,10 @@ def main():
             (convert(row) for row in read_v1_table(in_name)))
 
     map_table('load_zones', 'load_area',
-              [('LOAD_ZONE', 'load_area')])
+              [('LOAD_ZONE', 'load_area'),
+               # Needed when adding local_td module:
+               ('existing_local_td', lambda row: 0),
+               ('local_td_annual_cost_per_mw', lambda row: 9999)])
 
     map_table('loads', 'la_hourly_demand',
               [('LOAD_ZONE', 'load_area'),
@@ -200,6 +211,19 @@ def main():
                            for row in rows) / len(rows)}
          for (load_area, fuel, period), rows in groups))
 
+    write_file(os.path.join(v2_inputs, 'financials.dat'), """\
+param base_financial_year := 2015;
+param interest_rate := .07;
+param discount_rate := .05;
+param distribution_loss_rate := 0.1;
+""")
+
+    write_file(os.path.join(v2_inputs, 'modules'), """\
+project.no_commit
+fuel_cost
+local_td
+""")
+
     for name in sorted(files_left_to_convert):
         print 'remaining:', name
 
@@ -221,7 +245,7 @@ def main():
         open(os.path.join(v2_outputs, 'DispatchProj.tab')),
         delimiter='\t'))
     assert_eq(len(v2_dispatch), 1)
-    assert_eq('%.4f' % float(v2_dispatch[0]['DispatchProj']), '4.6042')
+    assert_eq('%.4f' % float(v2_dispatch[0]['DispatchProj']), '5.0646')
 
 
 if __name__ == '__main__':
