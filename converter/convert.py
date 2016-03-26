@@ -6,7 +6,6 @@ import os
 import shutil
 
 import v1_example
-import v2_example
 
 
 def write_file(filename, data):
@@ -40,7 +39,6 @@ def main():
 
     v2_inputs = os.path.join('tmp', 'v2_inputs')
     os.mkdir(v2_inputs)
-    v2_example.write_example(v2_inputs)
 
     def read_v1_table(name):
         fh = open(os.path.join(v1_inputs, '%s.tab' % name), 'r')
@@ -51,10 +49,7 @@ def main():
 
         return list(csv.DictReader(fh, delimiter='\t'))
 
-    files_left_to_convert = set(os.listdir(v2_inputs))
-
     def write_v2_table(name, fields, rows):
-        files_left_to_convert.remove('%s.tab' % name)
         filename = os.path.join(v2_inputs, '%s.tab' % name)
         fh = open(filename, 'w')
 
@@ -223,9 +218,6 @@ project.no_commit
 fuel_cost
 local_td
 """)
-
-    for name in sorted(files_left_to_convert):
-        print 'remaining:', name
 
     v2_outputs = os.path.join('tmp', 'v2_outputs')
     import switch_mod.solve
