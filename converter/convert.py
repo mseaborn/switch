@@ -3,6 +3,7 @@
 
 import csv
 import os
+import re
 import shutil
 
 import v1_example
@@ -235,6 +236,8 @@ local_td
     # Check that we got some output.
     assert os.path.exists(os.path.join(v2_outputs, 'DispatchProj.tab'))
 
+    # Check dispatch results
+
     v1_dispatch = list(csv.DictReader(
         open(os.path.join('v1_outputs/generator_and_storage_dispatch_0.txt')),
         delimiter='\t'))
@@ -246,6 +249,15 @@ local_td
         delimiter='\t'))
     assert_eq(len(v2_dispatch), 1)
     assert_eq('%.4f' % float(v2_dispatch[0]['DispatchProj']), '5.0646')
+
+    # Check objective function results
+
+    # Look for result in log output.
+    log_line = read_file(os.path.join('v1_outputs/objective_function.txt'))
+    m = re.search('optimal solution; objective (\S+)', log_line)
+    assert m, repr(log_line)
+    v1_total_cost = m.group(1)
+    assert_eq(v1_total_cost, '71864962.5199815')
 
     v2_total_cost = read_file(os.path.join(v2_outputs,
                                            'total_cost.txt')).rstrip()
