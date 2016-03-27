@@ -201,6 +201,13 @@ def save_results(model, results, instance, outdir):
         _save_results(model, instance, outdir, model.module_list)
         _save_generic_results(instance, outdir)
 
+        values = instance.Minimize_System_Cost.values()
+        assert len(values) == 1
+        total_cost = values[0].value()
+        fh = open(os.path.join(outdir, 'total_cost.txt'), 'w')
+        fh.write('%s\n' % total_cost)
+        fh.close()
+
     return success
 
 def min_data_check(model, *mandatory_model_components):

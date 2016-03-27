@@ -8,6 +8,14 @@ import shutil
 import v1_example
 
 
+def read_file(filename):
+    fh = open(filename, "r")
+    try:
+        return fh.read()
+    finally:
+        fh.close()
+
+
 def write_file(filename, data):
     fh = open(filename, "w")
     try:
@@ -238,6 +246,10 @@ local_td
         delimiter='\t'))
     assert_eq(len(v2_dispatch), 1)
     assert_eq('%.4f' % float(v2_dispatch[0]['DispatchProj']), '5.0646')
+
+    v2_total_cost = read_file(os.path.join(v2_outputs,
+                                           'total_cost.txt')).rstrip()
+    assert_eq(v2_total_cost, '1833907497.56')
 
 
 if __name__ == '__main__':
