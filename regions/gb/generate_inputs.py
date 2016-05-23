@@ -37,6 +37,8 @@ def get_generators():
     for row in reader:
         if row[0] == 'Total':
             break
+        if row[2] not in ('CCGT', 'Coal'):
+            continue
         yield {'name': row[1].replace(' ', '_'),
                'gen_type': row[2],
                'capacity_mw': int(row[3]),
@@ -97,39 +99,37 @@ LZ,2,0.5
     write_input('generator_info', """\
 generation_technology,g_max_age,g_min_build_capacity,g_scheduled_outage_rate,g_forced_outage_rate,g_is_resource_limited,g_is_variable,g_is_baseload,g_is_flexible_baseload,g_is_cogen,g_competes_for_space,g_variable_o_m,g_energy_source,g_full_load_heat_rate
 CCGT,20,0,0.04,0.06,0,0,0,0,0,0,3.4131,NaturalGas,6.705
+Coal,20,0,0.04,0.06,0,0,0,0,0,0,3.4131,NaturalGas,6.705
 """)
 
     fh = open(os.path.join(inputs_dir, 'project_info.tab'), 'w')
     out = csv.writer(fh, dialect=AmplTab)
     out.writerow('PROJECT,proj_gen_tech,proj_load_zone,proj_capacity_limit_mw,proj_connect_cost_per_mw'.split(','))
     for gen in get_generators():
-        if gen['gen_type'] == 'CCGT':
-            out.writerow([gen['name'],
-                          gen['gen_type'],
-                          'LZ',
-                          gen['capacity_mw'],
-                          0]) # TODO
+        out.writerow([gen['name'],
+                      gen['gen_type'],
+                      'LZ',
+                      gen['capacity_mw'],
+                      0]) # TODO
     fh.flush()
 
     fh = open(os.path.join(inputs_dir, 'proj_existing_builds.tab'), 'w')
     out = csv.writer(fh, dialect=AmplTab)
     out.writerow('PROJECT,build_year,proj_existing_cap'.split(','))
     for gen in get_generators():
-        if gen['gen_type'] == 'CCGT':
-            out.writerow([gen['name'],
-                          2000, # TODO: gen['build_year'],
-                          gen['capacity_mw']])
+        out.writerow([gen['name'],
+                      2000, # TODO: gen['build_year'],
+                      gen['capacity_mw']])
     fh.flush()
 
     fh = open(os.path.join(inputs_dir, 'proj_build_costs.tab'), 'w')
     out = csv.writer(fh, dialect=AmplTab)
     out.writerow('PROJECT,build_year,proj_overnight_cost,proj_fixed_om'.split(','))
     for gen in get_generators():
-        if gen['gen_type'] == 'CCGT':
-            out.writerow([gen['name'],
-                          2000, # TODO: gen['build_year'],
-                          1, # TODO
-                          1]) # TODO
+        out.writerow([gen['name'],
+                      2000, # TODO: gen['build_year'],
+                      1, # TODO
+                      1]) # TODO
     fh.flush()
 
     # Fuel cost and CO2 intensity.  Cost can vary by load zone; CO2
