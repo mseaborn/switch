@@ -1,7 +1,20 @@
 
+import csv
 import os
+import re
+import shutil
 
 import switch_mod.solve
+
+
+class AmplTab(object):
+    delimiter = "\t"
+    lineterminator = "\n"
+    doublequote = False
+    escapechar = "\\"
+    quotechar = '"'
+    quoting = csv.QUOTE_MINIMAL
+    skipinitialspace = False
 
 
 def write_file(filename, data):
@@ -12,8 +25,28 @@ def write_file(filename, data):
         fh.close()
 
 
+def get_generators():
+    reader = csv.reader(open('dukes5_10.csv'))
+
+    # Find the heading row
+    while True:
+        row = next(reader)
+        if row[0] == 'Company Name':
+            break
+
+    for row in reader:
+        if row[0] == 'Total':
+            break
+        yield {'name': row[1].replace(' ', '_'),
+               'gen_type': row[2],
+               'capacity_mw': int(row[3]),
+               'build_year': row[4]}
+
+
 def main():
     inputs_dir = 'inputs'
+    if os.path.exists(inputs_dir):
+        shutil.rmtree(inputs_dir)
     if not os.path.exists(inputs_dir):
         os.mkdir(inputs_dir)
 
@@ -51,41 +84,59 @@ param discount_rate := .05;
 
     write_input('load_zones', """\
 LOAD_ZONE,cost_multipliers,ccs_distance_km,dbid
-South,1,0,3
+LZ,1,0,3
 """)
     write_input('loads', """\
 LOAD_ZONE,TIMEPOINT,lz_demand_mw
-South,1,6.2
-South,2,0.5
+LZ,1,6.2
+LZ,2,0.5
 """)
 
     # Possible generators
 
     write_input('generator_info', """\
 generation_technology,g_max_age,g_min_build_capacity,g_scheduled_outage_rate,g_forced_outage_rate,g_is_resource_limited,g_is_variable,g_is_baseload,g_is_flexible_baseload,g_is_cogen,g_competes_for_space,g_variable_o_m,g_energy_source,g_full_load_heat_rate
-Geothermal,30,0,0.0075,0.0241,1,0,1,0,0,0,28.83,Geothermal,.
-NG_CC,20,0,0.04,0.06,0,0,0,0,0,0,3.4131,NaturalGas,6.705
-Central_PV,20,0,0,0.02,1,1,0,0,0,1,0,Solar,.
+CCGT,20,0,0.04,0.06,0,0,0,0,0,0,3.4131,NaturalGas,6.705
 """)
-    write_input('project_info', """\
-PROJECT,proj_dbid,proj_gen_tech,proj_load_zone,proj_connect_cost_per_mw,proj_capacity_limit_mw,proj_variable_om
-S-Geothermal,33,Geothermal,South,134222,10,28.83
-S-NG_CC,34,NG_CC,South,57566.6,.,3.4131
-S-Central_PV-1,41,Central_PV,South,74881.9,2,.
-""")
-    # Already-built projects.
-    write_input('proj_existing_builds', """\
-PROJECT,build_year,proj_existing_cap
-S-NG_CC,2000,5
-S-Central_PV-1,2000,1
-S-Geothermal,1998,1
-""")
+
+    fh = open(os.path.join(inputs_dir, 'project_info.tab'), 'w')
+    out = csv.writer(fh, dialect=AmplTab)
+    out.writerow('PROJECT,proj_gen_tech,proj_load_zone,proj_capacity_limit_mw,proj_connect_cost_per_mw'.split(','))
+    for gen in get_generators():
+        if gen['gen_type'] == 'CCGT':
+            out.writerow([gen['name'],
+                          gen['gen_type'],
+                          'LZ',
+                          gen['capacity_mw'],
+                          0]) # TODO
+    fh.flush()
+
+    fh = open(os.path.join(inputs_dir, 'proj_existing_builds.tab'), 'w')
+    out = csv.writer(fh, dialect=AmplTab)
+    out.writerow('PROJECT,build_year,proj_existing_cap'.split(','))
+    for gen in get_generators():
+        if gen['gen_type'] == 'CCGT':
+            out.writerow([gen['name'],
+                          2000, # TODO: gen['build_year'],
+                          gen['capacity_mw']])
+    fh.flush()
+
+    fh = open(os.path.join(inputs_dir, 'proj_build_costs.tab'), 'w')
+    out = csv.writer(fh, dialect=AmplTab)
+    out.writerow('PROJECT,build_year,proj_overnight_cost,proj_fixed_om'.split(','))
+    for gen in get_generators():
+        if gen['gen_type'] == 'CCGT':
+            out.writerow([gen['name'],
+                          2000, # TODO: gen['build_year'],
+                          1, # TODO
+                          1]) # TODO
+    fh.flush()
 
     # Fuel cost and CO2 intensity.  Cost can vary by load zone; CO2
     # intensity does not.
     write_input('fuel_cost', """\
 load_zone,fuel,period,fuel_cost
-South,NaturalGas,2020,4
+LZ,NaturalGas,2020,4
 """)
     write_input('fuels', """\
 fuel,co2_intensity,upstream_co2_intensity
@@ -97,16 +148,8 @@ energy_source
 Solar
 Geothermal
 """)
-    write_input('proj_build_costs', """\
-PROJECT,build_year,proj_overnight_cost,proj_fixed_om
-S-NG_CC,2000,1143900,5868.3
-S-Central_PV-1,2000,2334300,41850
-S-Geothermal,1998,5524200,0
-""")
     write_input('variable_capacity_factors', """\
 PROJECT,timepoint,proj_max_capacity_factor
-S-Central_PV-1,1,0.61
-S-Central_PV-1,2,0
 """)
 
     write_file(os.path.join(inputs_dir, 'modules'), 'project.no_commit\n')
