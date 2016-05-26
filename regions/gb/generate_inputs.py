@@ -170,6 +170,7 @@ LZ,1,0,3
             g_is_cogen=0,
             g_competes_for_space=0,
         ))
+    gen_techs['Coal'].update(dict(g_is_flexible_baseload=1))
 
     fh = open(os.path.join(inputs_dir, 'generator_info.tab'), 'w')
     fields = 'generation_technology,g_max_age,g_min_build_capacity,g_scheduled_outage_rate,g_forced_outage_rate,g_is_resource_limited,g_is_variable,g_is_baseload,g_is_flexible_baseload,g_is_cogen,g_competes_for_space,g_variable_o_m,g_energy_source,g_full_load_heat_rate'.split(',')
