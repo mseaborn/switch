@@ -25,6 +25,11 @@ def write_file(filename, data):
         fh.close()
 
 
+def remove_dir(path):
+    if os.path.exists(path):
+        shutil.rmtree(path)
+
+
 # Convert from US dollars to UK pounds.
 # Approximate exchange rate.
 # TODO: We should probably avoid using US dollar costs as our inputs.
@@ -59,10 +64,9 @@ def get_generators():
 
 def main():
     inputs_dir = 'inputs'
-    if os.path.exists(inputs_dir):
-        shutil.rmtree(inputs_dir)
-    if not os.path.exists(inputs_dir):
-        os.mkdir(inputs_dir)
+    remove_dir(inputs_dir)
+    os.mkdir(inputs_dir)
+    remove_dir('outputs')
 
     def write_input(name, data):
         write_file(os.path.join(inputs_dir, '%s.tab' % name),
