@@ -96,11 +96,56 @@ LZ,2,0.5
 
     # Possible generators
 
-    write_input('generator_info', """\
-generation_technology,g_max_age,g_min_build_capacity,g_scheduled_outage_rate,g_forced_outage_rate,g_is_resource_limited,g_is_variable,g_is_baseload,g_is_flexible_baseload,g_is_cogen,g_competes_for_space,g_variable_o_m,g_energy_source,g_full_load_heat_rate
-CCGT,20,0,0.04,0.06,0,0,0,0,0,0,3.4131,NaturalGas,6.705
-Coal,20,0,0.04,0.06,0,0,0,0,0,0,3.4131,NaturalGas,6.705
-""")
+    gen_techs = dict((name, {'generation_technology': name})
+                     for name in ['CCGT', 'Coal'])
+
+    # From Switch WECC docs, Oct 2013, Table 2-4
+    gen_techs['Coal'].update(dict(
+        # Coal Steam Turbine
+        g_overnight_cost=3.04,
+        g_fixed_o_m=24000,
+        g_variable_o_m=3.9,
+        g_energy_source='Coal',
+    ))
+    gen_techs['CCGT'].update(dict(
+        g_overnight_cost=1.29,
+        g_fixed_o_m=7000,
+        g_variable_o_m=3.9,
+        g_energy_source='NaturalGas',
+    ))
+
+    # From Switch WECC docs, Oct 2013, Table 2-5
+    gen_techs['Coal'].update(dict(
+        g_full_load_heat_rate=9.0,
+        g_max_age=40,
+        g_forced_outage_rate=0.06,
+        g_scheduled_outage_rate=0.10,
+    ))
+    gen_techs['CCGT'].update(dict(
+        g_full_load_heat_rate=6.7,
+        g_max_age=20,
+        g_forced_outage_rate=0.04,
+        g_scheduled_outage_rate=0.06,
+    ))
+
+    for gen_tech in gen_techs.values():
+        gen_tech.update(dict(
+            g_min_build_capacity=0,
+            g_is_resource_limited=0,
+            g_is_variable=0,
+            g_is_baseload=0,
+            g_is_flexible_baseload=0,
+            g_is_cogen=0,
+            g_competes_for_space=0,
+        ))
+
+    fh = open(os.path.join(inputs_dir, 'generator_info.tab'), 'w')
+    fields = 'generation_technology,g_max_age,g_min_build_capacity,g_scheduled_outage_rate,g_forced_outage_rate,g_is_resource_limited,g_is_variable,g_is_baseload,g_is_flexible_baseload,g_is_cogen,g_competes_for_space,g_variable_o_m,g_energy_source,g_full_load_heat_rate'.split(',')
+    out = csv.DictWriter(fh, fields, dialect=AmplTab)
+    out.writeheader()
+    for gen_tech in gen_techs.values():
+        out.writerow(dict((key, gen_tech[key]) for key in fields))
+    fh.close()
 
     fh = open(os.path.join(inputs_dir, 'project_info.tab'), 'w')
     out = csv.writer(fh, dialect=AmplTab)
@@ -137,10 +182,12 @@ Coal,20,0,0.04,0.06,0,0,0,0,0,0,3.4131,NaturalGas,6.705
     write_input('fuel_cost', """\
 load_zone,fuel,period,fuel_cost
 LZ,NaturalGas,2020,4
+LZ,Coal,2020,4
 """)
     write_input('fuels', """\
 fuel,co2_intensity,upstream_co2_intensity
 NaturalGas,0.05306,0
+Coal,0.05306,0
 """)
 
     write_input('non_fuel_energy_sources', """\
