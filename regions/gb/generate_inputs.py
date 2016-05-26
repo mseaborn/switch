@@ -238,5 +238,19 @@ PROJECT,timepoint,proj_max_capacity_factor
     # Check that we got some output.
     assert os.path.exists(os.path.join('outputs', 'DispatchProj.tab'))
 
+    generator_to_type = dict((gen['name'], gen['gen_type'])
+                             for gen in get_generators())
+    totals = {}
+    for row in csv.DictReader(open(os.path.join('outputs',
+                                                'DispatchProj.tab')),
+                              dialect=AmplTab):
+        gen_tech = generator_to_type[row['PROJ_DISPATCH_POINTS_1']]
+        totals.setdefault(gen_tech, 0)
+        totals[gen_tech] += \
+            float(row['DispatchProj']) * 2 * 2 * (365.25 / 12) / 1e6
+    for gen_tech, total in sorted(totals.iteritems()):
+        print 'Total generation for %s: %.2f TWh' % (gen_tech, total)
+    print 'Total generation: %.2f TWh' % sum(totals.itervalues())
+
 
 main()
