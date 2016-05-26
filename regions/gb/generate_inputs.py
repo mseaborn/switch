@@ -49,7 +49,7 @@ def get_generators():
         # National Grid of Britain only.
         if location == 'Northern Ireland':
             continue
-        if row[2] not in ('CCGT', 'Coal'):
+        if row[2] not in ('CCGT', 'Coal', 'Nuclear'):
             continue
         yield {'name': row[1].replace(' ', '_'),
                'gen_type': row[2],
@@ -141,7 +141,7 @@ LZ,1,0,3
     # Possible generators
 
     gen_techs = dict((name, {'generation_technology': name})
-                     for name in ['CCGT', 'Coal'])
+                     for name in ['CCGT', 'Coal', 'Nuclear'])
 
     # From Switch WECC docs, Oct 2013, Table 2-4
     gen_techs['Coal'].update(dict(
@@ -157,6 +157,12 @@ LZ,1,0,3
         g_variable_o_m=3.9,
         g_energy_source='NaturalGas',
     ))
+    gen_techs['Nuclear'].update(dict(
+        g_overnight_cost=6.41,
+        g_fixed_o_m=133000,
+        g_variable_o_m=0,
+        g_energy_source='Uranium',
+    ))
 
     # From Switch WECC docs, Oct 2013, Table 2-5
     gen_techs['Coal'].update(dict(
@@ -168,6 +174,12 @@ LZ,1,0,3
     gen_techs['CCGT'].update(dict(
         g_full_load_heat_rate=6.7,
         g_max_age=20,
+        g_forced_outage_rate=0.04,
+        g_scheduled_outage_rate=0.06,
+    ))
+    gen_techs['Nuclear'].update(dict(
+        g_full_load_heat_rate=9.7,
+        g_max_age=40,
         g_forced_outage_rate=0.04,
         g_scheduled_outage_rate=0.06,
     ))
@@ -183,6 +195,7 @@ LZ,1,0,3
             g_competes_for_space=0,
         ))
     gen_techs['Coal'].update(dict(g_is_flexible_baseload=1))
+    gen_techs['Nuclear'].update(dict(g_is_baseload=1))
 
     fh = open(os.path.join(inputs_dir, 'generator_info.tab'), 'w')
     fields = 'generation_technology,g_max_age,g_min_build_capacity,g_scheduled_outage_rate,g_forced_outage_rate,g_is_resource_limited,g_is_variable,g_is_baseload,g_is_flexible_baseload,g_is_cogen,g_competes_for_space,g_variable_o_m,g_energy_source,g_full_load_heat_rate'.split(',')
@@ -242,7 +255,11 @@ LZ,1,0,3
         #   So MMBTU per tonne = (2100.82 / 0.90718474) / 95.35
         # Coal price: roughly $65 per tonne in 2015.
         ['LZ', 'Coal', 2020,
-         usd_to_ukp(65 / ((2100.82 / 0.90718474) / 95.35))]])
+         usd_to_ukp(65 / ((2100.82 / 0.90718474) / 95.35))],
+        # Uranium price for US projected for 2015.
+        # From http://www.energy.ca.gov/2007publications/CEC-200-2007-011/CEC-200-2007-011-SD.PDF
+        ['LZ', 'Uranium', 2020, usd_to_ukp(2.58)],
+    ])
     fh.close()
 
     fh = open(os.path.join(inputs_dir, 'fuels.tab'), 'w')
@@ -251,7 +268,9 @@ LZ,1,0,3
     # From https://www.eia.gov/environment/emissions/co2_vol_mass.cfm
     out.writerows([['fuel', 'co2_intensity'],
                    ['NaturalGas', 53.07e-3],
-                   ['Coal', 95.35e-3]])
+                   ['Coal', 95.35e-3],
+                   ['Uranium', 0],
+                   ])
     fh.close()
 
     write_input('non_fuel_energy_sources', """\
