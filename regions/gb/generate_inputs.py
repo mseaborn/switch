@@ -37,6 +37,11 @@ def get_generators():
     for row in reader:
         if row[0] == 'Total':
             break
+        location = row[5]
+        # Omit generators in Northern Ireland, since we are modelling the
+        # National Grid of Britain only.
+        if location == 'Northern Ireland':
+            continue
         if row[2] not in ('CCGT', 'Coal'):
             continue
         yield {'name': row[1].replace(' ', '_'),
