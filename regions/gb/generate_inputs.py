@@ -222,11 +222,15 @@ load_zone,fuel,period,fuel_cost
 LZ,NaturalGas,2020,4
 LZ,Coal,2020,4
 """)
-    write_input('fuels', """\
-fuel,co2_intensity,upstream_co2_intensity
-NaturalGas,0.05306,0
-Coal,0.05306,0
-""")
+
+    fh = open(os.path.join(inputs_dir, 'fuels.tab'), 'w')
+    out = csv.writer(fh, dialect=AmplTab)
+    # CO2 intensity in metric tons of CO2 per MMBTU.
+    # From https://www.eia.gov/environment/emissions/co2_vol_mass.cfm
+    out.writerows([['fuel', 'co2_intensity'],
+                   ['NaturalGas', 53.07e-3],
+                   ['Coal', 95.35e-3]])
+    fh.close()
 
     write_input('non_fuel_energy_sources', """\
 energy_source
