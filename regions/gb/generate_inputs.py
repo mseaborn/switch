@@ -205,6 +205,9 @@ LZ,1,0,3
         out.writerow(dict((key, gen_tech[key]) for key in fields))
     fh.close()
 
+    print 'Total generator capacity: %d MW' % \
+        sum(gen['capacity_mw'] for gen in get_generators())
+
     fh = open(os.path.join(inputs_dir, 'project_info.tab'), 'w')
     out = csv.writer(fh, dialect=AmplTab)
     out.writerow('PROJECT,proj_gen_tech,proj_load_zone,proj_capacity_limit_mw,proj_connect_cost_per_mw'.split(','))
