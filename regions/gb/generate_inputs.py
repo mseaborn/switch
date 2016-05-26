@@ -64,15 +64,54 @@ def main():
 INVESTMENT_PERIOD,period_start,period_end
 2020,2017,2026
 """)
-    write_input('timeseries', """\
-TIMESERIES,ts_period,ts_duration_of_tp,ts_num_tps,ts_scale_to_period
-2020_all,2020,12,2,3652.5
-""")
-    write_input('timepoints', """\
-timepoint_id,timestamp,timeseries
-1,2025011512,2020_all
-2,2025011600,2020_all
-""")
+
+    # Generate list of time series.
+    fh = open(os.path.join(inputs_dir, 'timeseries.tab'), 'w')
+    out = csv.DictWriter(fh, 'TIMESERIES,ts_period,ts_duration_of_tp,ts_num_tps,ts_scale_to_period'.split(','), dialect=AmplTab)
+    out.writeheader()
+    # Use 12 time series: one per month.
+    # For each time series, use 12 time points, spaced 2 hours apart.
+    for month in xrange(1, 12 + 1):
+        out.writerow(dict(TIMESERIES='2020_%02d' % month,
+                          ts_period=2020,
+                          ts_duration_of_tp=2,
+                          ts_num_tps=12,
+                          # TODO: take into account that months are non-equal
+                          ts_scale_to_period=365.25 / 12 * 10))
+
+    # Generate time points list.
+    fh = open(os.path.join(inputs_dir, 'timepoints.tab'), 'w')
+    out = csv.DictWriter(fh, 'timepoint_id,timestamp,timeseries'.split(','), dialect=AmplTab)
+    out.writeheader()
+    for month in xrange(1, 12 + 1):
+        for hour in xrange(0, 24, 2):
+            out.writerow(dict(timepoint_id='%02d-%02d' % (month, hour),
+                              timestamp='%02d-%02d' % (month, hour),
+                              timeseries='2020_%02d' % (month)))
+
+    # Read historical load (demand) data.
+    fh = open(os.path.join(inputs_dir, 'loads.tab'), 'w')
+    out = csv.DictWriter(fh, 'LOAD_ZONE,TIMEPOINT,lz_demand_mw'.split(','), dialect=AmplTab)
+    out.writeheader()
+    month_list = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+                  'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+    month_map = dict((name, num + 1) for num, name in enumerate(month_list))
+    # TODO: Adjust for time zone shift (GMT vs. BST), which sometimes
+    # produces less or more than 48 settlement periods per day.
+    for row in csv.DictReader(open('demand_2015.csv')):
+        date_parts = row['SETTLEMENT_DATE'].split('-')
+        # Use first day of each month.
+        # TODO: Use better sampling.
+        if date_parts[0] == '01':
+            period = int(row['SETTLEMENT_PERIOD']) - 1
+            if period % 4 == 0:
+                assert period < 48, period
+                hour = period / 2
+                month = month_map[date_parts[1]]
+                out.writerow(dict(LOAD_ZONE='LZ',
+                                  TIMEPOINT='%02d-%02d' % (month, hour),
+                                  lz_demand_mw=int(row['ND']) / 2))
+    fh.close()
 
     # Financial parameters
 
@@ -82,16 +121,9 @@ param interest_rate := .07;
 param discount_rate := .05;
 """)
 
-    # Load (demand) and its organisation into zones
-
     write_input('load_zones', """\
 LOAD_ZONE,cost_multipliers,ccs_distance_km,dbid
 LZ,1,0,3
-""")
-    write_input('loads', """\
-LOAD_ZONE,TIMEPOINT,lz_demand_mw
-LZ,1,6.2
-LZ,2,0.5
 """)
 
     # Possible generators
@@ -201,7 +233,7 @@ PROJECT,timepoint,proj_max_capacity_factor
 
     write_file(os.path.join(inputs_dir, 'modules'), 'project.no_commit\n')
 
-    switch_mod.solve.main(['-v'])
+    switch_mod.solve.main([])
 
     # Check that we got some output.
     assert os.path.exists(os.path.join('outputs', 'DispatchProj.tab'))
