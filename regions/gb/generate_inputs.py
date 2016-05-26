@@ -56,7 +56,15 @@ def get_generators():
             continue
         if row[2] not in ('CCGT', 'Coal', 'Nuclear'):
             continue
-        yield {'name': row[1].replace(' ', '_'),
+
+        # The Killingholme A and B plants are the only case where the name
+        # field in the table isn't unique.
+        name = row[1]
+        if name == 'Killingholme':
+            name += ' ' + row[0]
+        name = name.replace(' ', '_')
+
+        yield {'name': name,
                'gen_type': row[2],
                'capacity_mw': int(row[3]),
                'build_year': row[4]}
