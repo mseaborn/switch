@@ -25,6 +25,13 @@ def write_file(filename, data):
         fh.close()
 
 
+# Convert from US dollars to UK pounds.
+# Approximate exchange rate.
+# TODO: We should probably avoid using US dollar costs as our inputs.
+def usd_to_ukp(cost):
+    return cost / 1.5
+
+
 def get_generators():
     reader = csv.reader(open('dukes5_10.csv'))
 
@@ -217,11 +224,26 @@ LZ,1,0,3
 
     # Fuel cost and CO2 intensity.  Cost can vary by load zone; CO2
     # intensity does not.
-    write_input('fuel_cost', """\
-load_zone,fuel,period,fuel_cost
-LZ,NaturalGas,2020,4
-LZ,Coal,2020,4
-""")
+    fh = open(os.path.join(inputs_dir, 'fuel_cost.tab'), 'w')
+    out = csv.writer(fh, dialect=AmplTab)
+    # Prices from:
+    # https://www.ofgem.gov.uk/sites/default/files/docs/2015/09/wholesale_energy_markets_in_2015_final_0.pdf
+    out.writerows([
+        ['load_zone', 'fuel', 'period', 'fuel_cost'],
+        # Wholesale gas cost: approx 0.50ukp per therm in 2015,
+        # which is 0.50 / 0.1 = 5 ukp per MMBTU.
+        # (1 therm = 0.10 MMBTU.)
+        ['LZ', 'NaturalGas', 2020, 5],
+        # CO2:
+        # Based on https://www.eia.gov/environment/emissions/co2_vol_mass.cfm:
+        #   2100.82 kg CO2 / short ton of coal
+        #     = 2100.82 kg CO2 / 0.90718474 tonne of coal
+        #   also 95.35 kg CO2 / MMBTU
+        #   So MMBTU per tonne = (2100.82 / 0.90718474) / 95.35
+        # Coal price: roughly $65 per tonne in 2015.
+        ['LZ', 'Coal', 2020,
+         usd_to_ukp(65 / ((2100.82 / 0.90718474) / 95.35))]])
+    fh.close()
 
     fh = open(os.path.join(inputs_dir, 'fuels.tab'), 'w')
     out = csv.writer(fh, dialect=AmplTab)
@@ -241,7 +263,10 @@ Geothermal
 PROJECT,timepoint,proj_max_capacity_factor
 """)
 
-    write_file(os.path.join(inputs_dir, 'modules'), 'project.no_commit\n')
+    write_file(os.path.join(inputs_dir, 'modules'), """\
+project.no_commit
+fuel_cost
+""")
 
     switch_mod.solve.main([])
 
