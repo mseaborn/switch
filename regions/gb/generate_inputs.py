@@ -134,7 +134,7 @@ INVESTMENT_PERIOD,period_start,period_end
                 month = month_map[date_parts[1]]
                 out.writerow(dict(LOAD_ZONE='LZ',
                                   TIMEPOINT='%02d-%02d' % (month, hour),
-                                  lz_demand_mw=int(row['ND']) / 2))
+                                  lz_demand_mw=int(row['ND'])))
     fh.close()
 
     # Financial parameters
@@ -316,7 +316,7 @@ fuel_cost
         gen_tech = generator_to_type[row['PROJ_DISPATCH_POINTS_1']]
         totals.setdefault(gen_tech, 0)
         totals[gen_tech] += \
-            float(row['DispatchProj']) * 2 * 2 * (365.25 / 12) / 1e6
+            float(row['DispatchProj']) * 2 * (365.25 / 12) / 1e6
     for gen_tech, total in sorted(totals.iteritems()):
         print 'Total generation for %s: %.2f TWh' % (gen_tech, total)
     print 'Total generation: %.2f TWh' % sum(totals.itervalues())
