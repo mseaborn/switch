@@ -158,21 +158,21 @@ LZ,1,0,3
     # From Switch WECC docs, Oct 2013, Table 2-4
     gen_techs['Coal'].update(dict(
         # Coal Steam Turbine
-        g_overnight_cost=3.04,
-        g_fixed_o_m=24000,
-        g_variable_o_m=3.9,
+        g_overnight_cost=usd_to_ukp(3.04),
+        g_fixed_o_m=usd_to_ukp(24000),
+        g_variable_o_m=usd_to_ukp(3.9),
         g_energy_source='Coal',
     ))
     gen_techs['CCGT'].update(dict(
-        g_overnight_cost=1.29,
-        g_fixed_o_m=7000,
-        g_variable_o_m=3.9,
+        g_overnight_cost=usd_to_ukp(1.29),
+        g_fixed_o_m=usd_to_ukp(7000),
+        g_variable_o_m=usd_to_ukp(3.9),
         g_energy_source='NaturalGas',
     ))
     gen_techs['Nuclear'].update(dict(
-        g_overnight_cost=6.41,
-        g_fixed_o_m=133000,
-        g_variable_o_m=0,
+        g_overnight_cost=usd_to_ukp(6.41),
+        g_fixed_o_m=usd_to_ukp(133000),
+        g_variable_o_m=usd_to_ukp(0),
         g_energy_source='Uranium',
     ))
 
