@@ -158,19 +158,19 @@ LZ,1,0,3
     # From Switch WECC docs, Oct 2013, Table 2-4
     gen_techs['Coal'].update(dict(
         # Coal Steam Turbine
-        g_overnight_cost=usd_to_ukp(3.04),
+        g_overnight_cost_per_watt=usd_to_ukp(3.04),
         g_fixed_o_m=usd_to_ukp(24000),
         g_variable_o_m=usd_to_ukp(3.9),
         g_energy_source='Coal',
     ))
     gen_techs['CCGT'].update(dict(
-        g_overnight_cost=usd_to_ukp(1.29),
+        g_overnight_cost_per_watt=usd_to_ukp(1.29),
         g_fixed_o_m=usd_to_ukp(7000),
         g_variable_o_m=usd_to_ukp(3.9),
         g_energy_source='NaturalGas',
     ))
     gen_techs['Nuclear'].update(dict(
-        g_overnight_cost=usd_to_ukp(6.41),
+        g_overnight_cost_per_watt=usd_to_ukp(6.41),
         g_fixed_o_m=usd_to_ukp(133000),
         g_variable_o_m=usd_to_ukp(0),
         g_energy_source='Uranium',
@@ -244,10 +244,11 @@ LZ,1,0,3
     out = csv.writer(fh, dialect=AmplTab)
     out.writerow('PROJECT,build_year,proj_overnight_cost,proj_fixed_om'.split(','))
     for gen in get_generators():
-        out.writerow([gen['name'],
-                      2000, # TODO: gen['build_year'],
-                      1, # TODO
-                      1]) # TODO
+        out.writerow([
+            gen['name'],
+            2000, # TODO: gen['build_year'],
+            gen_techs[gen['gen_type']]['g_overnight_cost_per_watt'] * 1e6,
+            gen_techs[gen['gen_type']]['g_fixed_o_m']])
     fh.flush()
 
     # Fuel cost and CO2 intensity.  Cost can vary by load zone; CO2
