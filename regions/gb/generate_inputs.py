@@ -17,6 +17,14 @@ class AmplTab(object):
     skipinitialspace = False
 
 
+def read_file(filename):
+    fh = open(filename, "r")
+    try:
+        return fh.read()
+    finally:
+        fh.close()
+
+
 def write_file(filename, data):
     fh = open(filename, "w")
     try:
@@ -348,7 +356,12 @@ fuel_cost
             float(row['DispatchProj']) * 2 * (365.25 / 12) / 1e6
     for gen_tech, total in sorted(totals.iteritems()):
         print 'Total generation for %s: %.2f TWh' % (gen_tech, total)
-    print 'Total generation: %.2f TWh' % sum(totals.itervalues())
+    gen_total = sum(totals.itervalues())
+    print 'Total generation: %.2f TWh' % gen_total
+    total_cost = float(read_file(os.path.join('outputs', 'total_cost.txt')))
+    print 'Total cost: %.2f billion UKP' % (total_cost / 1e9)
+    print 'Unit cost of energy: %.4f UKP/kWh' % (
+        total_cost / (gen_total * 1e9))
 
 
 def main():
