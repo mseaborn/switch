@@ -66,11 +66,12 @@ def get_generators():
 
         yield {'name': name,
                'gen_type': row[2],
+               'capacity_limit_mw': '.', # Unlimited
                'capacity_mw': int(row[3]),
                'build_year': row[4]}
 
 
-def main():
+def run_model(allow_existing, allow_new):
     inputs_dir = 'inputs'
     remove_dir(inputs_dir)
     os.mkdir(inputs_dir)
@@ -217,24 +218,40 @@ LZ,1,0,3
         out.writerow(dict((key, gen_tech[key]) for key in fields))
     fh.close()
 
+    generators = []
+    new_generators = []
+    if allow_existing:
+        generators.extend(get_generators())
+    if allow_new:
+        for gen_type in ('CCGT', 'Coal', 'Nuclear'):
+            new_generators.append(
+                {'gen_type': gen_type,
+                 'name': 'P_%s' % gen_type,
+                 'capacity_limit_mw': '.',
+                 # Workaround: Switch doesn't like it if there are no
+                 # existing projects, so use a very small existing
+                 # capacity.
+                 'capacity_mw': 1e-9})
+    generators.extend(new_generators)
+
     print 'Total generator capacity: %d MW' % \
-        sum(gen['capacity_mw'] for gen in get_generators())
+        sum(gen['capacity_mw'] for gen in generators)
 
     fh = open(os.path.join(inputs_dir, 'project_info.tab'), 'w')
     out = csv.writer(fh, dialect=AmplTab)
     out.writerow('PROJECT,proj_gen_tech,proj_load_zone,proj_capacity_limit_mw,proj_connect_cost_per_mw'.split(','))
-    for gen in get_generators():
+    for gen in generators:
         out.writerow([gen['name'],
                       gen['gen_type'],
                       'LZ',
-                      gen['capacity_mw'],
+                      gen['capacity_limit_mw'],
                       0]) # TODO
     fh.flush()
 
     fh = open(os.path.join(inputs_dir, 'proj_existing_builds.tab'), 'w')
     out = csv.writer(fh, dialect=AmplTab)
     out.writerow('PROJECT,build_year,proj_existing_cap'.split(','))
-    for gen in get_generators():
+    for gen in generators:
         out.writerow([gen['name'],
                       2000, # TODO: gen['build_year'],
                       gen['capacity_mw']])
@@ -243,10 +260,21 @@ LZ,1,0,3
     fh = open(os.path.join(inputs_dir, 'proj_build_costs.tab'), 'w')
     out = csv.writer(fh, dialect=AmplTab)
     out.writerow('PROJECT,build_year,proj_overnight_cost,proj_fixed_om'.split(','))
-    for gen in get_generators():
+    for gen in generators:
         out.writerow([
             gen['name'],
             2000, # TODO: gen['build_year'],
+            gen_techs[gen['gen_type']]['g_overnight_cost_per_watt'] * 1e6,
+            gen_techs[gen['gen_type']]['g_fixed_o_m']])
+    fh.flush()
+
+    fh = open(os.path.join(inputs_dir, 'gen_new_build_costs.tab'), 'w')
+    out = csv.writer(fh, dialect=AmplTab)
+    out.writerow('generation_technology,investment_period,g_overnight_cost,g_fixed_o_m'.split(','))
+    for gen in new_generators:
+        out.writerow([
+            gen['gen_type'],
+            2020,
             gen_techs[gen['gen_type']]['g_overnight_cost_per_watt'] * 1e6,
             gen_techs[gen['gen_type']]['g_fixed_o_m']])
     fh.flush()
@@ -309,7 +337,7 @@ fuel_cost
     assert os.path.exists(os.path.join('outputs', 'DispatchProj.tab'))
 
     generator_to_type = dict((gen['name'], gen['gen_type'])
-                             for gen in get_generators())
+                             for gen in generators)
     totals = {}
     for row in csv.DictReader(open(os.path.join('outputs',
                                                 'DispatchProj.tab')),
@@ -321,6 +349,13 @@ fuel_cost
     for gen_tech, total in sorted(totals.iteritems()):
         print 'Total generation for %s: %.2f TWh' % (gen_tech, total)
     print 'Total generation: %.2f TWh' % sum(totals.itervalues())
+
+
+def main():
+    print '\nNew builds only (from scratch):'
+    run_model(allow_existing=False, allow_new=True)
+    print '\nExisting generators only:'
+    run_model(allow_existing=True, allow_new=False)
 
 
 main()
