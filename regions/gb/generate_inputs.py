@@ -369,6 +369,8 @@ def main():
     run_model(allow_existing=False, allow_new=True)
     print '\nExisting generators only:'
     run_model(allow_existing=True, allow_new=False)
+    print '\nExisting generators and new builds:'
+    run_model(allow_existing=True, allow_new=True)
 
 
 main()
