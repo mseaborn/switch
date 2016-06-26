@@ -2,7 +2,7 @@
 import calendar
 import os
 import re
-import time
+import threading
 import urllib
 import urllib2
 
@@ -45,8 +45,16 @@ def main():
     if not os.path.exists(dest_dir):
         os.mkdir(dest_dir)
     year = 2015
-    num_fetches = 0
-    start_time = time.time()
+
+    tasks = []
+
+    def add(date_req, time_req, filename):
+        def func(thread_num):
+            print 'thread %s fetching %s' % (thread_num, filename)
+            data = fetch_timepoint(date_req, time_req)
+            write_file_atomic(filename, data)
+        tasks.append(func)
+
     for month in xrange(1, 12 + 1):
         numdays = calendar.monthrange(year, month)[1]
         for day in xrange(1, numdays + 1):
@@ -56,13 +64,25 @@ def main():
                 time_req = '%02d00' % hour
                 filename = os.path.join(
                     dest_dir, '%s-%s.csv' % (date_filename, time_req))
-                print filename
                 if not os.path.exists(filename):
-                    data = fetch_timepoint(date_req, time_req)
-                    write_file_atomic(filename, data)
-                    num_fetches += 1
-                    print '%f s per fetch' % (
-                        (time.time() - start_time) / num_fetches)
+                    add(date_req, time_req, filename)
+
+    lock = threading.Lock()
+    def thread(thread_num):
+        while True:
+            with lock:
+                if len(tasks) == 0:
+                    return
+                task = tasks.pop(0)
+            task(thread_num)
+
+    num_threads = 10
+    threads = [threading.Thread(target=thread, args=[i + 1])
+               for i in xrange(num_threads)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
 
 
 if __name__ == '__main__':
