@@ -14,7 +14,7 @@ def write_file_atomic(filename, data):
     os.rename(tmp_file, filename)
 
 
-def fetch_timepoint(date_arg, time_arg):
+def fetch_timepoint(date_arg, time_arg, dest_filename):
     query_data = urllib.urlencode([
         ('Type', 'Observation'),
         ('PredictionSiteID', 'ALL'),
@@ -30,6 +30,9 @@ def fetch_timepoint(date_arg, time_arg):
     code = response.getcode()
     assert code == 200, code
     data = response.read()
+    if 'No matching records were found.' in data:
+        print 'no data for %s' % dest_filename
+        return
     m = re.search('<a href="(https://datagovuk.blob.core.windows.net/csv/[0-9a-f]*.csv)">', data)
     assert m, repr(data)
     next_url = m.group(1)
@@ -37,7 +40,7 @@ def fetch_timepoint(date_arg, time_arg):
     response2 = urllib2.urlopen(next_url)
     code = response2.getcode()
     assert code == 200, code
-    return response2.read()
+    write_file_atomic(dest_filename, response2.read())
 
 
 def main():
@@ -51,8 +54,7 @@ def main():
     def add(date_req, time_req, filename):
         def func(thread_num):
             print 'thread %s fetching %s' % (thread_num, filename)
-            data = fetch_timepoint(date_req, time_req)
-            write_file_atomic(filename, data)
+            fetch_timepoint(date_req, time_req, filename)
         tasks.append(func)
 
     for month in xrange(1, 12 + 1):
