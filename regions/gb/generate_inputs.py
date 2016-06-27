@@ -79,6 +79,29 @@ def get_generators():
                'build_year': row[4]}
 
 
+# 10 sampling sites with the best wind data coverage.
+WIND_SITES = [name.replace(' ', '_') for name in [
+    'CRANWELL (3379)',
+    'WADDINGTON (3377)',
+    'CULDROSE (3809)',
+    'CAMBORNE (3808)',
+    'LEEMING (3257)',
+    'YEOVILTON (3853)',
+    'BRIZE NORTON (3649)',
+    'NORTHOLT (3672)',
+    'MIDDLE WALLOP (3749)',
+    'RONALDSWAY (3204)',
+]]
+
+
+# Convert "None" values to the "." used by the Ampl-style format that
+# Pyomo accepts.
+def map_none(val):
+    if val is None:
+        return '.'
+    return val
+
+
 def run_model(allow_existing, allow_new):
     inputs_dir = 'inputs'
     remove_dir(inputs_dir)
@@ -162,7 +185,7 @@ LZ,1,0,3
     # Possible generators
 
     gen_techs = dict((name, {'generation_technology': name})
-                     for name in ['CCGT', 'Coal', 'Nuclear'])
+                     for name in ['CCGT', 'Coal', 'Nuclear', 'Wind'])
 
     # From Switch WECC docs, Oct 2013, Table 2-4
     gen_techs['Coal'].update(dict(
@@ -184,6 +207,12 @@ LZ,1,0,3
         g_variable_o_m=usd_to_ukp(0),
         g_energy_source='Uranium',
     ))
+    gen_techs['Wind'].update(dict(
+        g_overnight_cost_per_watt=usd_to_ukp(2.08),
+        g_fixed_o_m=usd_to_ukp(63000),
+        g_variable_o_m=usd_to_ukp(0),
+        g_energy_source='Wind',
+    ))
 
     # From Switch WECC docs, Oct 2013, Table 2-5
     gen_techs['Coal'].update(dict(
@@ -204,6 +233,12 @@ LZ,1,0,3
         g_forced_outage_rate=0.04,
         g_scheduled_outage_rate=0.06,
     ))
+    gen_techs['Wind'].update(dict(
+        g_full_load_heat_rate=None,
+        g_max_age=30,
+        g_forced_outage_rate=0.05,
+        g_scheduled_outage_rate=0.006,
+    ))
 
     for gen_tech in gen_techs.values():
         gen_tech.update(dict(
@@ -217,13 +252,14 @@ LZ,1,0,3
         ))
     gen_techs['Coal'].update(dict(g_is_flexible_baseload=1))
     gen_techs['Nuclear'].update(dict(g_is_baseload=1))
+    gen_techs['Wind'].update(dict(g_is_variable=1))
 
     fh = open(os.path.join(inputs_dir, 'generator_info.tab'), 'w')
     fields = 'generation_technology,g_max_age,g_min_build_capacity,g_scheduled_outage_rate,g_forced_outage_rate,g_is_resource_limited,g_is_variable,g_is_baseload,g_is_flexible_baseload,g_is_cogen,g_competes_for_space,g_variable_o_m,g_energy_source,g_full_load_heat_rate'.split(',')
     out = csv.DictWriter(fh, fields, dialect=AmplTab)
     out.writeheader()
     for gen_tech in gen_techs.values():
-        out.writerow(dict((key, gen_tech[key]) for key in fields))
+        out.writerow(dict((key, map_none(gen_tech[key])) for key in fields))
     fh.close()
 
     generators = []
@@ -235,6 +271,15 @@ LZ,1,0,3
             new_generators.append(
                 {'gen_type': gen_type,
                  'name': 'P_%s' % gen_type,
+                 'capacity_limit_mw': '.',
+                 # Workaround: Switch doesn't like it if there are no
+                 # existing projects, so use a very small existing
+                 # capacity.
+                 'capacity_mw': 1e-9})
+        for site in WIND_SITES:
+            new_generators.append(
+                {'gen_type': 'Wind',
+                 'name': site,
                  'capacity_limit_mw': '.',
                  # Workaround: Switch doesn't like it if there are no
                  # existing projects, so use a very small existing
@@ -327,12 +372,19 @@ LZ,1,0,3
 
     write_input('non_fuel_energy_sources', """\
 energy_source
-Solar
-Geothermal
+Wind
 """)
-    write_input('variable_capacity_factors', """\
-PROJECT,timepoint,proj_max_capacity_factor
-""")
+
+    fh = open(os.path.join(inputs_dir, 'variable_capacity_factors.tab'), 'w')
+    out = csv.writer(fh, dialect=AmplTab)
+    out.writerow('PROJECT,timepoint,proj_max_capacity_factor'.split(','))
+    if allow_new:
+        for site in WIND_SITES:
+            for month in xrange(1, 12 + 1):
+                for hour in xrange(0, 24, 2):
+                    timepoint = '%02d-%02d' % (month, hour)
+                    out.writerow([site, timepoint, 1])
+    fh.close()
 
     write_file(os.path.join(inputs_dir, 'modules'), """\
 project.no_commit
