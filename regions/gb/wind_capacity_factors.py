@@ -3,6 +3,15 @@ import csv
 import glob
 
 
+# Data is from Table 1, "Conversion of wind speed to power output for a
+# 2,500kW wind turbine", from "Wind Power and the UK wind resource",
+# http://cedadocs.badc.rl.ac.uk/983/1/Wind_power_and_the_UK_wind_resource.pdf.
+#
+# This data is based on the characteristics of a Nordex N80 wind turbine.
+#
+# This data was referenced by "Space and Time: Wind in an Investment
+# Planning Model", Neuhoff et al. (2008),
+# http://www.eprg.group.cam.ac.uk/wp-content/uploads/2014/01/eprg0603.pdf.
 WIND_CF_TABLE_MS = dict((speed, float(kw) / 2500) for speed, kw in [
     # Pairs of (speed in m/s, power output in kW).
     (3, 0),
@@ -35,6 +44,9 @@ knots_per_ms = 1.943844
 def knots_to_ms(knots):
     return knots / knots_per_ms
 
+# Get the wind turbine capacity factor given a wind speed in knots, using
+# linear piecewise interpolation from the data in WIND_CF_TABLE_MS (which
+# is in m/s).
 def get_wind_capacity_factor(speed_knots):
     speed_ms = knots_to_ms(speed_knots)
     if speed_ms >= 25:
