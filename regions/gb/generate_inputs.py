@@ -6,6 +6,8 @@ import shutil
 
 import switch_mod.solve
 
+import wind_capacity_factors
+
 
 class AmplTab(object):
     delimiter = "\t"
@@ -45,6 +47,10 @@ def usd_to_ukp(cost):
     return cost / 1.5
 
 
+def munge_name(name):
+    return name.replace(' ', '_')
+
+
 def get_generators():
     reader = csv.reader(open('dukes5_10.csv'))
 
@@ -70,7 +76,7 @@ def get_generators():
         name = row[1]
         if name == 'Killingholme':
             name += ' ' + row[0]
-        name = name.replace(' ', '_')
+        name = munge_name(name)
 
         yield {'name': name,
                'gen_type': row[2],
@@ -79,19 +85,21 @@ def get_generators():
                'build_year': row[4]}
 
 
-# 10 sampling sites with the best wind data coverage.
-WIND_SITES = [name.replace(' ', '_') for name in [
-    'CRANWELL (3379)',
-    'WADDINGTON (3377)',
-    'CULDROSE (3809)',
-    'CAMBORNE (3808)',
-    'LEEMING (3257)',
-    'YEOVILTON (3853)',
-    'BRIZE NORTON (3649)',
-    'NORTHOLT (3672)',
-    'MIDDLE WALLOP (3749)',
-    'RONALDSWAY (3204)',
+# 10 sampling sites with high capacity factors.
+WIND_SITES = [munge_name(name) for name in [
+    'GREAT DUN FELL (3227)',
+    'CAIRNWELL (3072)',
+    'AONACH MOR (3041)',
+    'BEALACH NA BA (3039)',
+    'SOUTH UIST RANGE (3023)',
+    'ABERDARON (3405)',
+    'LERWICK (S. SCREEN) (3005)',
+    'SCILLY ST MARYS (3803)',
+    'ISLE OF PORTLAND (3857)',
+    'FAIR ISLE (3008)',
 ]]
+
+WIND_SITES_SET = set(WIND_SITES)
 
 
 # Convert "None" values to the "." used by the Ampl-style format that
@@ -379,11 +387,27 @@ Wind
     out = csv.writer(fh, dialect=AmplTab)
     out.writerow('PROJECT,timepoint,proj_max_capacity_factor'.split(','))
     if allow_new:
-        for site in WIND_SITES:
-            for month in xrange(1, 12 + 1):
-                for hour in xrange(0, 24, 2):
-                    timepoint = '%02d-%02d' % (month, hour)
-                    out.writerow([site, timepoint, 1])
+        # TODO: De-duplicate these loop ranges with similar ranges used in
+        # the generation of timepoints.tab and loads.tab.
+        for month in xrange(1, 12 + 1):
+            for hour in xrange(0, 24, 2):
+                wind_speed = dict((site, None) for site in WIND_SITES)
+                year = 2015
+                # TODO: Use "day = 1" so that this is actually in sync with
+                # the demand data.  We would need to deal with the problem
+                # that weather data is missing for some days.
+                day = 2
+                filename = ('weather_data/%04d-%02d-%02d-%02d00.csv'
+                            % (year, month, day, hour))
+                for row in csv.DictReader(open(filename, 'r')):
+                    site = munge_name(row['Site Name'])
+                    if site in WIND_SITES_SET:
+                        wind_speed[site] = int(row['Wind Speed'])
+                timepoint = '%02d-%02d' % (month, hour)
+                for site in WIND_SITES:
+                    cap_factor = wind_capacity_factors.WIND_CF_TABLE_KNOTS.get(
+                        wind_speed[site], 0)
+                    out.writerow([site, timepoint, cap_factor])
     fh.close()
 
     write_file(os.path.join(inputs_dir, 'modules'), """\
